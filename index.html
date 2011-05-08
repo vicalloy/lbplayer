@@ -1,0 +1,320 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml' lang='en' xml:lang='en'>
+<head>
+<title>Demo : jPlayer as video playlist and audio playlist players</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<link href="skin/jplayer.blue.monday.css" rel="stylesheet" type="text/css" />
+
+<style>
+	div.jp-playlist {
+		height: 200px;
+		overflow: auto;
+	}
+	div.jp-type-playlist div.jp-playlist li.jp-playlist-selected {
+		background-color: #DDDDDD;
+	}
+	div.jp-playlist-ctrl {
+		background-color: #EEEEEE;
+		border-left: 1px solid #009BE3;
+		border-bottom: 1px solid #009BE3;
+		border-right: 1px solid #009BE3;
+		width: 100%;
+	}
+</style>
+
+
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script type="text/javascript" src="js/jquery.jplayer.min.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+$(document).ready(function(){
+	//var a =['a','b','c'];
+	//for (i=0;i<a.length;i++) alert(a[i])
+	var Playlist = function(instance, options) {
+		var self = this;
+
+		this.instance = instance; // String: To associate specific HTML with this playlist
+		//this.playlist = playlist; // Array of Objects: The playlist
+		this.options = options; // Object: The jPlayer constructor options for this playlist
+
+		this.cssSelector = {};
+		this.cssId = {
+			jPlayer: "jquery_jplayer",
+			interface: "jp_interface",
+			playlist: "jp-playlist",
+			playlist_ctrl: "jp-playlist-ctrl",
+		};
+		$.each(this.cssId, function(entity, id) {
+			//self.cssSelector[entity] = $("#" + id, self.instance);
+			self.cssSelector[entity] = self.instance + " #" + id;
+			//self.cssSelector[entity] = "#" + id
+		});
+
+		this.current = 0;//current is idx
+		
+		if(!this.options.cssSelectorAncestor) {
+			//FIXME 感觉jplayer的dom模型处理有问题
+			//this.options.cssSelectorAncestor = '#jp_interface';
+			this.options.cssSelectorAncestor = this.cssSelector.interface;
+		}
+		
+		$(this.cssSelector.jPlayer).jPlayer(this.options);
+
+		$(".jp-previous", this.cssSelector.interface).click(function() {
+			self.playlistPrev();
+			$(this).blur();
+			return false;
+		});
+
+		$(".jp-next", this.cssSelector.interface).click(function() {
+			self.playlistNext();
+			$(this).blur();
+			return false;
+		});
+
+		$(".jp-add", this.cssSelector.playlist_ctrl).click(function() {
+			return false;
+		});
+		$(".jp-del", this.cssSelector.playlist_ctrl).click(function() {
+			var sel_lis = $('ul li.jp-playlist-selected', self.cssSelector.playlist);
+			sel_lis.each(function(){
+				var itemid = $(this).attr('itemid');
+				delete self.playlist[itemid];
+			});
+			sel_lis.remove();
+			return false;
+		});
+		$(".jp-clear", this.cssSelector.playlist_ctrl).click(function() {
+			//$("ul", this.cssSelector.playlist).empty();
+			self.displayPlaylist([]);
+			return false;
+		});
+		$(".jq-multi-sel", this.cssSelector.playlist_ctrl).click(function() {
+			return false;
+		});
+	};
+
+	Playlist.prototype = {
+		displayPlaylist: function(playlist) {
+			var self = this;
+			this.playlist = playlist;
+			$("ul", this.cssSelector.playlist).empty();
+			for (i=0; i < this.playlist.length; i++) {
+				var listItem = (i === this.playlist.length-1) ? "<li itemid='" + i +"' class='jp-playlist-last'>" : "<li  itemid='" + i +"'>";
+				listItem += "<a href='#' class='item-name' tabindex='1'>"+ this.playlist[i].name +"</a>";
+				listItem += "</li>";
+				this.playlist[i]['itemid'] = i;
+
+				// Associate playlist items with their media
+				$("ul", this.cssSelector.playlist).append(listItem);
+			}
+			$("ul li .item-name", this.cssSelector.playlist).each(function(){
+				$(this).click(function(){
+					$(this).parent().dblclick();
+				});
+			});
+			$("ul li", this.cssSelector.playlist).each(function(){
+				$(this).click(function(){
+					var itemid = $(this).attr('itemid');
+					self.playlistSelect(itemid);
+					return false;
+				});
+				$(this).dblclick(function(){
+					var itemid = $(this).attr('itemid');
+					if(self.current !== itemid) {
+						self.playlistChange(itemid);
+					} else {
+						$(self.cssSelector.jPlayer).jPlayer("play");
+					}
+					$(this).blur();
+					self.playlistSelect(itemid);
+					return false;
+				});
+			});
+		},
+		//TODO remove selected item
+		//TODO add item
+		//TODO clear item
+		playlistInit: function(autoplay) {
+			if(autoplay) {
+				this.playlistChange(this.current);
+			} else {
+				this.playlistConfig(this.current);
+			}
+		},
+		playlistSelect: function(itemid) {
+			//TODO 如果多选
+			var multi = true;
+			var sel_li = $('ul li[itemid=' + itemid + ']', this.cssSelector.playlist);
+			if (multi) {
+				var selected = sel_li.hasClass("jp-playlist-selected");
+				if (selected) {
+					sel_li.removeClass("jp-playlist-selected");
+				} else {
+					sel_li.addClass("jp-playlist-selected");
+				}
+			} else {
+				$('ul li', this.cssSelector.playlist).removeClass("jp-playlist-selected");
+				sel_li.addClass("jp-playlist-selected");
+			}
+		},
+		playlistConfig: function(itemid) {
+			$('ul li', this.cssSelector.playlist).removeClass("jp-playlist-current");
+			cur_li = $('ul li[itemid=' + itemid + ']', this.cssSelector.playlist);
+			if (cur_li.length == 0) 
+				return false;
+			cur_li.addClass("jp-playlist-current");
+			this.current = itemid;
+			$(this.cssSelector.jPlayer).jPlayer("setMedia", this.playlist[this.current]);
+		},
+		playlistChange: function(index) {
+			this.playlistConfig(index);
+			$(this.cssSelector.jPlayer).jPlayer("play");
+		},
+		playlistNext: function() {
+			var li = $('ul li[itemid=' + this.current + ']', this.cssSelector.playlist);
+			var itemid = li.next().attr('itemid');
+			if (typeof itemid == "undefined") {
+				itemid = $('ul li', this.cssSelector.playlist).first().attr('itemid');
+			}
+			//var index = (this.current + 1 < this.playlist.length) ? this.current + 1 : 0;
+			this.playlistChange(itemid);
+		},
+		playlistPrev: function() {
+			var li = $('ul li[itemid=' + this.current + ']', this.cssSelector.playlist);
+			var itemid = li.prev().attr('itemid');
+			if (typeof itemid == "undefined") {
+				itemid = $('ul li', this.cssSelector.playlist).last().attr('itemid');
+			}
+			//var index = (this.current - 1 >= 0) ? this.current - 1 : this.playlist.length - 1;
+			this.playlistChange(itemid);
+		}
+	};
+	var playlist = [
+		{
+			name:"Tempered Song",
+			mp3:"http://www.jplayer.org/audio/mp3/Miaow-01-Tempered-song.mp3",
+			oga:"http://www.jplayer.org/audio/ogg/Miaow-01-Tempered-song.ogg"
+		},
+		{
+			name:"Hidden",
+			mp3:"http://www.jplayer.org/audio/mp3/Miaow-02-Hidden.mp3",
+			oga:"http://www.jplayer.org/audio/ogg/Miaow-02-Hidden.ogg"
+		},
+		{
+			name:"Lentement",
+			free:true,
+			mp3:"http://www.jplayer.org/audio/mp3/Miaow-03-Lentement.mp3",
+			oga:"http://www.jplayer.org/audio/ogg/Miaow-03-Lentement.ogg"
+		},
+		{
+			name:"Lismore",
+			free:true,
+			mp3:"http://www.jplayer.org/audio/mp3/Miaow-04-Lismore.mp3",
+			oga:"http://www.jplayer.org/audio/ogg/Miaow-04-Lismore.ogg"
+		},
+		{
+			name:"The Separation",
+			mp3:"http://www.jplayer.org/audio/mp3/Miaow-05-The-separation.mp3",
+			oga:"http://www.jplayer.org/audio/ogg/Miaow-05-The-separation.ogg"
+		},
+		{
+			name:"Beside Me",
+			mp3:"http://www.jplayer.org/audio/mp3/Miaow-06-Beside-me.mp3",
+			oga:"http://www.jplayer.org/audio/ogg/Miaow-06-Beside-me.ogg"
+		},
+		{
+			name:"Bubble",
+			free:true,
+			mp3:"http://www.jplayer.org/audio/mp3/Miaow-07-Bubble.mp3",
+			oga:"http://www.jplayer.org/audio/ogg/Miaow-07-Bubble.ogg"
+		},
+		{
+			name:"Stirring of a Fool",
+			mp3:"http://www.jplayer.org/audio/mp3/Miaow-08-Stirring-of-a-fool.mp3",
+			oga:"http://www.jplayer.org/audio/ogg/Miaow-08-Stirring-of-a-fool.ogg"
+		},
+		{
+			name:"Partir",
+			mp3:"http://www.jplayer.org/audio/mp3/Miaow-09-Partir.mp3",
+			oga:"http://www.jplayer.org/audio/ogg/Miaow-09-Partir.ogg"
+		},
+		{
+			name:"Thin Ice",
+			free:true,
+			mp3:"http://www.jplayer.org/audio/mp3/Miaow-10-Thin-ice.mp3",
+			oga:"http://www.jplayer.org/audio/ogg/Miaow-10-Thin-ice.ogg"
+		}
+
+	];
+
+	var audioPlaylist = new Playlist('#jquery_jplayer_1', {
+		ready: function() {
+			audioPlaylist.displayPlaylist(playlist);
+			audioPlaylist.playlistInit(false); // Parameter is a boolean for autoplay.
+		},
+		ended: function() {
+			audioPlaylist.playlistNext();
+		},
+		play: function() {
+			$(this).jPlayer("pauseOthers");
+		},
+		swfPath: "js",
+		supplied: "oga, mp3"
+	});
+});
+//]]>
+</script>
+</head>
+<body>
+	<div id="jquery_jplayer_1">
+		<div id="jquery_jplayer" class="jp-jplayer"> </div>
+		<div class="jp-audio" id="jp-audio">
+			<div class="jp-type-playlist">
+				<div id="jp_interface" class="jp-interface">
+					<ul class="jp-controls">
+						<li><a href="#" class="jp-play" tabindex="1">play</a></li>
+						<li><a href="#" class="jp-pause" tabindex="1">pause</a></li>
+						<li><a href="#" class="jp-stop" tabindex="1">stop</a></li>
+						<li><a href="#" class="jp-mute" tabindex="1">mute</a></li>
+						<li><a href="#" class="jp-unmute" tabindex="1">unmute</a></li>
+						<li><a href="#" class="jp-previous" tabindex="1">previous</a></li>
+						<li><a href="#" class="jp-next" tabindex="1">next</a></li>
+					</ul>
+					<div class="jp-progress">
+						<div class="jp-seek-bar">
+							<div class="jp-play-bar"></div>
+						</div>
+					</div>
+					<div class="jp-volume-bar">
+						<div class="jp-volume-bar-value"></div>
+					</div>
+					<div class="jp-current-time"></div>
+					<div class="jp-duration"></div>
+				</div>
+				<div id="jp-playlist" class="jp-playlist">
+					<ul>
+						<!-- The method Playlist.displayPlaylist() uses this unordered list -->
+						<li></li>
+					</ul>
+				</div>
+				<div class="jp-playlist-ctrl">
+					<div style="padding: 4px 0 4px 10px">
+						<button class="jp-add">添加</button>
+						<button class="jp-del">删除</button>
+						<button class="jp-clear">清空</button>
+						<input type=checkbox class="jq-multi-sel"/>多选
+						<input type=checkbox class="jq-random"/>随机播放
+					</div>
+				</div>
+			</div>
+
+			
+		</div>
+
+		
+
+	</div>
+</body>
+</html>
