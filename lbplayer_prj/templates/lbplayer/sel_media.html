@@ -4,17 +4,17 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title>Dynatree - Example</title>
 
-	<script src="{{ MEDIA_URL }}js/jquery.js" type="text/javascript"></script>
-	<script src="{{ MEDIA_URL }}js/jquery-ui.custom.js" type="text/javascript"></script>
-	<script src="{{ MEDIA_URL }}js/jquery.cookie.js" type="text/javascript"></script>
+	<script src="{{ MEDIA_URL }}lbplayer/js/jquery.js" type="text/javascript"></script>
+	<script src="{{ MEDIA_URL }}lbplayer/js/jquery-ui.custom.js" type="text/javascript"></script>
+	<script src="{{ MEDIA_URL }}lbplayer/js/jquery.cookie.js" type="text/javascript"></script>
 
-	<link href="{{ MEDIA_URL }}dynatree/skin-vista/ui.dynatree.css" rel="stylesheet" type="text/css">
-	<script src="{{ MEDIA_URL }}js/jquery.dynatree.min.js" type="text/javascript"></script>
+	<link href="{{ MEDIA_URL }}lbplayer/dynatree/skin-vista/ui.dynatree.css" rel="stylesheet" type="text/css">
+	<script src="{{ MEDIA_URL }}lbplayer/js/jquery.dynatree.min.js" type="text/javascript"></script>
 
 <script type="text/javascript">
 	var _activeKey = null;
+    url_lbplayer_ajax_childs = "{% url lbplayer_ajax_childs %}"
 	$(function(){
-
 		// --- Initialize sample trees
 		tree = $("#tree").dynatree({
 			title: "Lazy loading sample",
@@ -29,7 +29,7 @@
 			},
 			fx: { height: "toggle", duration: 200 },
 			// initAjax is hard to fake, so we pass the children as object array:
-			initAjax: {url: "{% url lbplayer_ajax_childs %}",
+			initAjax: {url: url_lbplayer_ajax_childs,
 					   dataType: "json",
 					   data: {key: "",
 							  //sleep: 1,
@@ -39,7 +39,7 @@
 					   },
 			onLazyRead: function(node){
 				node.appendAjax(
-					{url: "{% url lbplayer_ajax_childs %}",
+					{url: url_lbplayer_ajax_childs,
 					 dataType: "json", // Enable JSONP, so this sample can be run from the local file system against a localhost server
 					 data: {key: node.data.key,
 							//mode: "branch"

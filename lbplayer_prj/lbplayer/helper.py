@@ -55,6 +55,8 @@ def gen_childs(root_path, key=None):
         folder_path = find_folder_by_key(root_path, key)
     else:
         folder_path = root_path
+    if not folder_path:
+        return []
     nodes = []
     file_nodes = []
     for fn in os.listdir(folder_path):
