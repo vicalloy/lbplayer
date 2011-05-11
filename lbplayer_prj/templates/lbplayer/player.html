@@ -1,0 +1,274 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml' lang='en' xml:lang='en'>
+<head>
+<title>Demo : jPlayer as video playlist and audio playlist players</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<link href="{{ MEDIA_URL }}skin/jplayer.blue.monday.css" rel="stylesheet" type="text/css" />
+
+<style>
+	div.jp-playlist {
+		height: 200px;
+		overflow: auto;
+	}
+	div.jp-type-playlist div.jp-playlist li.jp-playlist-selected {
+		background-color: #DDDDDD;
+	}
+	div.jp-playlist-ctrl {
+		background-color: #EEEEEE;
+		border-left: 1px solid #009BE3;
+		border-bottom: 1px solid #009BE3;
+		border-right: 1px solid #009BE3;
+		width: 100%;
+	}
+</style>
+
+
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.jplayer.min.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+$(document).ready(function(){
+	var Playlist = function(instance, options) {
+		var self = this;
+
+		this.instance = instance; // String: To associate specific HTML with this playlist
+		//this.playlist = playlist; // Array of Objects: The playlist
+		this.options = options; // Object: The jPlayer constructor options for this playlist
+
+		this.cssSelector = {};
+		this.cssId = {
+			jPlayer: "jquery_jplayer",
+			interface: "jp_interface",
+			playlist: "jp-playlist",
+			playlist_ctrl: "jp-playlist-ctrl",
+		};
+		$.each(this.cssId, function(entity, id) {
+			//self.cssSelector[entity] = $("#" + id, self.instance);
+			self.cssSelector[entity] = self.instance + " #" + id;
+			//self.cssSelector[entity] = "#" + id
+		});
+
+		this.current = 0;//current is idx
+		
+		if(!this.options.cssSelectorAncestor) {
+			//FIXME 感觉jplayer的dom模型处理有问题
+			//this.options.cssSelectorAncestor = '#jp_interface';
+			this.options.cssSelectorAncestor = this.cssSelector.interface;
+		}
+		
+		$(this.cssSelector.jPlayer).jPlayer(this.options);
+
+		$(".jp-previous", this.cssSelector.interface).click(function() {
+			self.playlistPrev();
+			$(this).blur();
+			return false;
+		});
+
+		$(".jp-next", this.cssSelector.interface).click(function() {
+			self.playlistNext();
+			$(this).blur();
+			return false;
+		});
+
+		$(".jp-add", this.cssSelector.playlist_ctrl).click(function() {
+			var url = "{% url lbplayer_sel_media %}";
+			var name = "sel_media";
+    		var retVal = window.showModalDialog(url, name, 'height=700,width=960,resizable=yes,scrollbars=yes');
+			if (!retVal) return false;
+			$.post('{% url lbplayer_ajax_medias %}', { keys: retVal }, function(data) {
+				self.add2palylist(data);
+			});
+			return false;
+		});
+		$(".jp-remove", this.cssSelector.playlist_ctrl).click(function() {
+			var sel_lis = $('ul li.jp-playlist-selected', self.cssSelector.playlist);
+			sel_lis.each(function(){
+				var idx = self.getPlaylistIdx(this);
+  				self.playlist.splice(idx, 1);
+				
+			});
+			sel_lis.remove();
+			return false;
+		});
+		$(".jp-clear", this.cssSelector.playlist_ctrl).click(function() {
+			self.displayPlaylist([]);
+			return false;
+		});
+		$(".jq-multi-sel", this.cssSelector.playlist_ctrl).click(function() {
+			//
+		});
+	};
+
+	Playlist.prototype = {
+		getPlaylistItem: function() {
+			return $('ul li', this.cssSelector.playlist);
+		},
+		getPlaylistIdx: function(o) {
+			return this.getPlaylistItem().index(o);
+		},
+		add2palylist: function(playlist) {
+			var self = this;
+			if (!this.playlist) {
+				this.playlist = playlist;
+			} else {
+				this.playlist = this.playlist.concat(playlist);
+			}
+			var startIdx = this.playlist.length - playlist.length
+			for (i=startIdx; i < this.playlist.length; i++) {
+				//var listItem = (i === this.playlist.length-1) ? "<li class='jp-playlist-last'>" : "<li>";
+				var listItem = "<li>";
+				listItem += "<a href='#' class='item-name' tabindex='1'>"+ this.playlist[i].name +"</a>";
+				listItem += "</li>";
+
+				// Associate playlist items with their media
+				$("ul", this.cssSelector.playlist).append(listItem);
+			}
+			$("ul li .item-name", this.cssSelector.playlist).each(function(){
+				$(this).unbind("click"); 
+				$(this).click(function(){
+					$(this).parent().dblclick();
+				});
+			});
+			$("ul li", this.cssSelector.playlist).each(function(){
+				$(this).unbind("click"); 
+				$(this).click(function(){
+					self.playlistSelect(this);
+					return false;
+				});
+				$(this).unbind("dblclick"); 
+				$(this).dblclick(function(){
+					var idx = self.getPlaylistIdx(this);
+					if(self.current !== idx) {
+						self.playlistChange(idx);
+					} else {
+						$(self.cssSelector.jPlayer).jPlayer("play");
+					}
+					$(this).blur();
+					self.playlistSelect(this);
+					return false;
+				});
+			});
+		},
+		displayPlaylist: function(playlist) {
+			this.playlist = [];
+			$("ul", this.cssSelector.playlist).empty();
+			this.add2palylist(playlist);
+		},
+		playlistInit: function(autoplay) {
+			if(autoplay) {
+				this.playlistChange(this.current);
+			} else {
+				this.playlistConfig(this.current);
+			}
+		},
+		playlistSelect: function(o) {
+			o = $(o);
+			var multi = $(".jq-multi-sel", this.cssSelector.playlist_ctrl)[0].checked;
+			if (multi) {
+				var selected = o.hasClass("jp-playlist-selected");
+				if (selected) {
+					o.removeClass("jp-playlist-selected");
+				} else {
+					o.addClass("jp-playlist-selected");
+				}
+			} else {
+				$('ul li', this.cssSelector.playlist).removeClass("jp-playlist-selected");
+				o.addClass("jp-playlist-selected");
+			}
+		},
+		playlistConfig: function(idx) {
+			$('ul li', this.cssSelector.playlist).removeClass("jp-playlist-current");
+			var cur_li = this.getPlaylistItem()[idx];
+			cur_li = $(cur_li);//TODO 确认一下是否需要$
+			if (cur_li.length == 0) 
+				return false;
+			cur_li.addClass("jp-playlist-current");
+			this.current = idx;
+			$(this.cssSelector.jPlayer).jPlayer("setMedia", this.playlist[this.current]);
+		},
+		playlistChange: function(idx) {
+			this.playlistConfig(idx);
+			$(this.cssSelector.jPlayer).jPlayer("play");
+		},
+		playlistNext: function() {
+			var random = $(".jq-random", this.cssSelector.playlist_ctrl)[0].checked;
+			var len = this.playlist.length;
+			var idx = (this.current + 1 < len) ? this.current + 1 : 0;
+			if (random) {
+				idx = Math.round(Math.random()*len);
+			}
+			this.playlistChange(idx);
+		},
+		playlistPrev: function() {
+			var idx = (this.current - 1 >= 0) ? this.current - 1 : this.playlist.length - 1;
+			this.playlistChange(idx);
+		}
+	};
+	var playlist = [ ];
+
+	var audioPlaylist = new Playlist('#jquery_jplayer_1', {
+		ready: function() {
+			audioPlaylist.displayPlaylist(playlist);
+			audioPlaylist.playlistInit(false); // Parameter is a boolean for autoplay.
+		},
+		ended: function() {
+			audioPlaylist.playlistNext();
+		},
+		play: function() {
+			$(this).jPlayer("pauseOthers");
+		},
+		swfPath: "/static/js",
+		supplied: "mp3"
+	});
+});
+//]]>
+</script>
+</head>
+<body>
+	<div id="jquery_jplayer_1">
+		<div id="jquery_jplayer" class="jp-jplayer"> </div>
+		<div class="jp-audio" id="jp-audio">
+			<div class="jp-type-playlist">
+				<div id="jp_interface" class="jp-interface">
+					<ul class="jp-controls">
+						<li><a href="#" class="jp-play" tabindex="1">play</a></li>
+						<li><a href="#" class="jp-pause" tabindex="1">pause</a></li>
+						<li><a href="#" class="jp-stop" tabindex="1">stop</a></li>
+						<li><a href="#" class="jp-mute" tabindex="1">mute</a></li>
+						<li><a href="#" class="jp-unmute" tabindex="1">unmute</a></li>
+						<li><a href="#" class="jp-previous" tabindex="1">previous</a></li>
+						<li><a href="#" class="jp-next" tabindex="1">next</a></li>
+					</ul>
+					<div class="jp-progress">
+						<div class="jp-seek-bar">
+							<div class="jp-play-bar"></div>
+						</div>
+					</div>
+					<div class="jp-volume-bar">
+						<div class="jp-volume-bar-value"></div>
+					</div>
+					<div class="jp-current-time"></div>
+					<div class="jp-duration"></div>
+				</div>
+				<div id="jp-playlist" class="jp-playlist">
+					<ul>
+						<!-- The method Playlist.displayPlaylist() uses this unordered list -->
+					</ul>
+				</div>
+				<div id="jp-playlist-ctrl" class="jp-playlist-ctrl">
+					<div style="padding: 4px 0 4px 10px">
+						<button class="jp-add">添加</button>
+						<button class="jp-remove">移除</button>
+						<button class="jp-clear">清空</button>
+						<input type="checkbox" class="jq-multi-sel"/>多选
+						<input type="checkbox" class="jq-random"/>随机播放
+					</div>
+				</div>
+			</div>
+			
+		</div>
+
+	</div>
+</body>
+</html>
