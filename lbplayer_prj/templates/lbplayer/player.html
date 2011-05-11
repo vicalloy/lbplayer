@@ -87,11 +87,14 @@ $(document).ready(function(){
 		});
 		$(".jp-remove", this.cssSelector.playlist_ctrl).click(function() {
 			var sel_lis = $('ul li.jp-playlist-selected', self.cssSelector.playlist);
+			var idxs = [];
 			sel_lis.each(function(){
 				var idx = self.getPlaylistIdx(this);
-  				self.playlist.splice(idx, 1);
+				idxs.push(idx)
 				
 			});
+			for (var i=idxs.length - 1; i>=0; i--)
+  				self.playlist.splice(idxs[i], 1);
 			sel_lis.remove();
 			return false;
 		});
@@ -143,11 +146,12 @@ $(document).ready(function(){
 				$(this).unbind("dblclick"); 
 				$(this).dblclick(function(){
 					var idx = self.getPlaylistIdx(this);
-					if(self.current !== idx) {
+					self.playlistChange(idx);
+					/*if(self.current !== idx) {
 						self.playlistChange(idx);
 					} else {
 						$(self.cssSelector.jPlayer).jPlayer("play");
-					}
+					}*/
 					$(this).blur();
 					self.playlistSelect(this);
 					return false;
