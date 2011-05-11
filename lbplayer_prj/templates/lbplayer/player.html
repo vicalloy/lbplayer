@@ -4,7 +4,7 @@
 <title>Demo : jPlayer as video playlist and audio playlist players</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-<link href="{{ MEDIA_URL }}skin/jplayer.blue.monday.css" rel="stylesheet" type="text/css" />
+<link href="{{ MEDIA_URL }}lbplayer/skin/jplayer.blue.monday.css" rel="stylesheet" type="text/css" />
 
 <style>
 	div.jp-playlist {
@@ -24,10 +24,13 @@
 </style>
 
 
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.jplayer.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}lbplayer/js/jquery.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}lbplayer/js/jquery.jplayer.min.js"></script>
 <script type="text/javascript">
 //<![CDATA[
+swfPath = "{{ MEDIA_URL }}lbplayer/js";
+url_lbplayer_sel_media = "{% url lbplayer_sel_media %}";
+url_lbplayer_ajax_medias = "{% url lbplayer_ajax_medias %}";
 $(document).ready(function(){
 	var Playlist = function(instance, options) {
 		var self = this;
@@ -72,11 +75,9 @@ $(document).ready(function(){
 		});
 
 		$(".jp-add", this.cssSelector.playlist_ctrl).click(function() {
-			var url = "{% url lbplayer_sel_media %}";
-			var name = "sel_media";
-    		var retVal = window.showModalDialog(url, name, 'height=700,width=960,resizable=yes,scrollbars=yes');
+    		var retVal = window.showModalDialog(url_lbplayer_sel_media, "sel_media", 'height=700,width=960,resizable=yes,scrollbars=yes');
 			if (!retVal) return false;
-			$.post('{% url lbplayer_ajax_medias %}', { keys: retVal }, function(data) {
+			$.post(url_lbplayer_ajax_medias, { keys: retVal }, function(data) {
 				self.add2palylist(data);
 			});
 			return false;
@@ -218,7 +219,7 @@ $(document).ready(function(){
 		play: function() {
 			$(this).jPlayer("pauseOthers");
 		},
-		swfPath: "/static/js",
+		swfPath: swfPath,
 		supplied: "mp3"
 	});
 });
