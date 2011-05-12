@@ -28,9 +28,16 @@ class LazyEncoder(JSONEncoder):
 def render_json_response(data):
     return  HttpResponse(LazyEncoder().encode(data), mimetype='application/json')
 
+def decode_fn(fn):
+    encode = lbp_settings.LBP_FILENAME_ENCODE
+    encode = encode.upper()
+    if encode == 'UTF-8':
+        return fn
+    return fn.decode(encode, 'ignore').encode('UTF-8')
+
 def fmt_fn(media_root, fn):
     fn = fn[len(media_root):].replace('\\', '/')
-    fn = lbp_settings.LBP_DECODE_FN_FUNC(fn)
+    fn = decode_fn(fn)
     url = lbp_settings.LBP_MEDIA_PREFIX + urllib.quote(fn)
     return url
 
@@ -64,7 +71,7 @@ def gen_childs(root_path, key=None):
         isdir = os.path.isdir(full_fn)
         if not isdir and not lbp_settings.LBP_IS_MEDIA_FUNC(fn):
             continue
-        node = {"title": lbp_settings.LBP_DECODE_FN_FUNC(fn),
+        node = {"title": decode_fn(fn),
                 "key": key_from_string(full_fn),
                 "isFolder": isdir,
                 "isLazy": isdir,
@@ -83,7 +90,7 @@ def get_all_medias(media_root, root_path):
             full_fn = os.path.join(root, fn)
             if not lbp_settings.LBP_IS_MEDIA_FUNC(full_fn):
                 continue
-            medias.append({'name': lbp_settings.LBP_DECODE_FN_FUNC(fn),
+            medias.append({'name': decode_fn(fn),
                 'mp3': fmt_fn(media_root, full_fn),
                 })
     return medias
@@ -103,7 +110,7 @@ def keys2medias(keys, root_path):
             full_fn  = os.path.join(root, name)
             file_key = key_from_string(full_fn) 
             if file_key in keys:
-                node = {'name': lbp_settings.LBP_DECODE_FN_FUNC(name),
+                node = {'name': decode_fn(name),
                         'mp3': fmt_fn(root_path, full_fn),
                         }
                 medias.append(node)

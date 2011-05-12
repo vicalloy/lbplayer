@@ -61,6 +61,7 @@ ADMIN_MEDIA_PREFIX = '/media/'
 
 LBP_MEDIA_PREFIX = '%smusic/' % MEDIA_URL
 LBP_MEDIA_ROOT = '%smusic/' % MEDIA_ROOT
+LBP_FILENAME_ENCODE = 'GBK'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'py+#mklhmbh)5y==ul40w!y-%6&zgi5^u%x1^t19=!badf$zl)'
