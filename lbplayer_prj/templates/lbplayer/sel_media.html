@@ -15,34 +15,26 @@
 	var _activeKey = null;
     url_lbplayer_ajax_childs = "{% url lbplayer_ajax_childs %}"
 	$(function(){
-		// --- Initialize sample trees
 		tree = $("#tree").dynatree({
-			title: "Lazy loading sample",
+			title: "Musics",
 			persist: false,
 			checkbox: true,
 			selectMode: 3,
 			onPostInit: function(isReloading, isError) {
-//				alert("reloading: "+isReloading+", error:"+isError);
 			   logMsg("onPostInit(%o, %o) - %o", isReloading, isError, this);
-			   // Re-fire onActivate, so the text is updated
 			   this.reactivate();
 			},
 			fx: { height: "toggle", duration: 200 },
-			// initAjax is hard to fake, so we pass the children as object array:
 			initAjax: {url: url_lbplayer_ajax_childs,
 					   dataType: "json",
 					   data: {key: "",
-							  //sleep: 1,
-							  //mode: "baseFolders"
 							  },
-					   //addExpandedKeyList: true // Send list of expanded keys, so the webservice can deliver these children also
 					   },
 			onLazyRead: function(node){
 				node.appendAjax(
 					{url: url_lbplayer_ajax_childs,
 					 dataType: "json", // Enable JSONP, so this sample can be run from the local file system against a localhost server
 					 data: {key: node.data.key,
-							//mode: "branch"
 							}
 				});
 			},
@@ -52,14 +44,6 @@
 			}
 		});
 
-		$("#btnReload").click(function(){
-			$("#tree").dynatree("getTree").reload();
-			return false;
-		});
-		$("#btnReloadNode").click(function(){
-			$("#tree").dynatree("getTree").getNodeByKey(_activeKey).reloadChildren();
-			return false;
-		});
 		$("#btnOk").click(function(){
 			selRootNodes = $("#tree").dynatree("getTree").getSelectedNodes(true);
 			var selRootKeys = $.map(selRootNodes, function(node){
@@ -80,16 +64,18 @@
 </head>
 
 <body>
+	<p>
+		<button id="btnOk">确定</button>
+		<button id="btnCancel">取消</button>
+	</p>
+
 	<div id="tree">
 		<!-- When using initAjax, it may be nice to put a throbber here, that spins until the initial content is loaded: -->
 		Loading...
 	</div>
 
 	<p>
-		<button id="btnOk"
-				onclick='
-				'
-				>确定</button>
+		<button id="btnOk">确定</button>
 		<button id="btnCancel">取消</button>
 	</p>
 </body>
