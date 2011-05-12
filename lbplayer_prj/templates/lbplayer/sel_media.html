@@ -44,19 +44,22 @@
 			}
 		});
 
-		$("#btnOk").click(function(){
-			selRootNodes = $("#tree").dynatree("getTree").getSelectedNodes(true);
-			var selRootKeys = $.map(selRootNodes, function(node){
-				return node.data.key;
+		$(".btnOk").each(function(){
+			$(this).click(function(){
+				var selRootNodes = $("#tree").dynatree("getTree").getSelectedNodes(true);
+				var selRootKeys = $.map(selRootNodes, function(node){
+					return node.data.key;
+				});
+				window.returnValue = selRootKeys.join(",");
+				window.close(); 
+				return false;
 			});
-			t = selRootKeys.join(",");
-			window.returnValue=t;
-			window.close(); 
-			return false;
 		});
-		$("#btnCancel").click(function(){
-			window.close(); 
-			return false;
+		$(".btnCancel").each(function(){
+			$(this).click(function(){
+				window.close(); 
+				return false;
+			});
 		});
 
 	});
@@ -65,8 +68,8 @@
 
 <body>
 	<p>
-		<button id="btnOk">确定</button>
-		<button id="btnCancel">取消</button>
+		<button class="btnOk">确定</button>
+		<button class="btnCancel">取消</button>
 	</p>
 
 	<div id="tree">
@@ -75,8 +78,8 @@
 	</div>
 
 	<p>
-		<button id="btnOk">确定</button>
-		<button id="btnCancel">取消</button>
+		<button class="btnOk">确定</button>
+		<button class="btnCancel">取消</button>
 	</p>
 </body>
 </html>
