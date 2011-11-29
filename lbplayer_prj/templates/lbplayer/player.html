@@ -229,6 +229,10 @@ $(document).ready(function(){
 		swfPath: swfPath,
 		supplied: "mp3"
 	});
+
+	$('#btn-show-upload').click(function () {
+		$('#jp-file-upload').toggle();
+	});
 });
 //]]>
 </script>
@@ -265,6 +269,9 @@ $(document).ready(function(){
 					</ul>
 				</div>
 				<div id="jp-playlist-ctrl" class="jp-playlist-ctrl">
+					<div style="padding: 6px 10px; float:right">
+						<button id="btn-show-upload">上传歌曲</button>
+					</div>
 					<div style="padding: 4px 0 4px 10px">
 						<button class="jp-add">添加</button>
 						<button class="jp-remove">移除</button>
@@ -273,9 +280,9 @@ $(document).ready(function(){
 						<input type="checkbox" class="jq-random"/>随机播放
 					</div>
 				</div>
-				<div id="jp-file-upload" class="jp-playlist-ctrl">
+				<div id="jp-file-upload" class="jp-playlist-ctrl" style="display: None">
 					<div style="padding: 4px 0 4px 10px">
-                    <form enctype="multipart/form-data" method="post" action="/upload/">
+						<form enctype="multipart/form-data" method="post" action="{% url lbplayer_upload %}">
                         {% csrf_token %}
                         {{form.as_p}}
                         <input type="submit" value="Upload" id="Save"/>
@@ -283,9 +290,7 @@ $(document).ready(function(){
 					</div>
 				</div>                
 			</div>
-			
 		</div>
-
 	</div>
 </body>
 </html>
