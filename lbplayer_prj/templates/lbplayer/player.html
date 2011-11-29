@@ -273,6 +273,15 @@ $(document).ready(function(){
 						<input type="checkbox" class="jq-random"/>随机播放
 					</div>
 				</div>
+				<div id="jp-file-upload" class="jp-playlist-ctrl">
+					<div style="padding: 4px 0 4px 10px">
+                    <form enctype="multipart/form-data" method="post" action="/upload/">
+                        {% csrf_token %}
+                        {{form.as_p}}
+                        <input type="submit" value="Upload" id="Save"/>
+                    </form>
+					</div>
+				</div>                
 			</div>
 			
 		</div>
