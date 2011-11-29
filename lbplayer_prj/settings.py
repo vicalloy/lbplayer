@@ -101,6 +101,11 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
 )
 
+FILE_UPLOAD_HANDLERS = (
+    'django.core.files.uploadhandler.MemoryFileUploadHandler',
+    'django.core.files.uploadhandler.TemporaryFileUploadHandler',
+)
+
 try:
     from local_settings import *
 except:
