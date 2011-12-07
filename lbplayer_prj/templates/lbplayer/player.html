@@ -4,7 +4,7 @@
 <title>lbplayer</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-<link href="{{ MEDIA_URL }}lbplayer/skin/jplayer.blue.monday.css" rel="stylesheet" type="text/css" />
+<link href="{{ STATIC_URL }}lbplayer/skin/jplayer.blue.monday.css" rel="stylesheet" type="text/css" />
 
 <style>
 	div.jp-playlist {
@@ -27,11 +27,11 @@
 </style>
 
 
-<script type="text/javascript" src="{{ MEDIA_URL }}lbplayer/js/jquery.min.js"></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}lbplayer/js/jquery.jplayer.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}lbplayer/js/jquery.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}lbplayer/js/jquery.jplayer.min.js"></script>
 <script type="text/javascript">
 //<![CDATA[
-swfPath = "{{ MEDIA_URL }}lbplayer/js";
+swfPath = "{{ STATIC_URL }}lbplayer/js";
 url_lbplayer_sel_media = "{% url lbplayer_sel_media %}";
 url_lbplayer_ajax_medias = "{% url lbplayer_ajax_medias %}";
 $(document).ready(function(){
@@ -270,7 +270,8 @@ $(document).ready(function(){
 				</div>
 				<div id="jp-playlist-ctrl" class="jp-playlist-ctrl">
 					<div style="padding: 6px 10px; float:right">
-						<button id="btn-show-upload">上传歌曲</button>
+						<!--button id="btn-show-upload">上传歌曲</button-->
+						<a href="/admin/filebrowser/browse/" target="_blank">上传歌曲</a>
 					</div>
 					<div style="padding: 4px 0 4px 10px">
 						<button class="jp-add">添加</button>
