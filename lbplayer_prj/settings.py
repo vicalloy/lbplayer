@@ -102,6 +102,17 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.request",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.static",
+    "django.core.context_processors.tz",
+    "django.contrib.messages.context_processors.messages"
+)
+
 ROOT_URLCONF = 'lbplayer_prj.urls'
 
 TEMPLATE_DIRS = (
@@ -113,6 +124,7 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+    'grappelli.dashboard',
     'grappelli',
     'filebrowser',
     
@@ -130,6 +142,8 @@ FILE_UPLOAD_HANDLERS = (
     'django.core.files.uploadhandler.MemoryFileUploadHandler',
     'django.core.files.uploadhandler.TemporaryFileUploadHandler',
 )
+
+GRAPPELLI_INDEX_DASHBOARD = 'lbplayer_prj.dashboard.CustomIndexDashboard'
 
 try:
     from local_settings import *
