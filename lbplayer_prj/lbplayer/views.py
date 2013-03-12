@@ -3,7 +3,7 @@
 import os
 from django import template
 from django.shortcuts import render_to_response, render, redirect
-from django.contrib.csrf.middleware import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
 
 from helper import render_json_response, gen_childs, keys2medias
 import settings as lbp_settings
