@@ -13,7 +13,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'ENGINE': 'django.db.backends.sqlite3',  # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'db.sqlite',                      # Or path to database file if using sqlite3.
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
@@ -91,7 +91,6 @@ SECRET_KEY = 'py+#mklhmbh)5y==ul40w!y-%6&zgi5^u%x1^t19=!badf$zl)'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -116,18 +115,18 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 ROOT_URLCONF = 'lbplayer_prj.urls'
 
 TEMPLATE_DIRS = (
-        os.path.join(HERE, 'templates_plus'),
-        os.path.join(HERE, 'templates'),
+    os.path.join(HERE, 'templates_plus'),
+    os.path.join(HERE, 'templates'),
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
 )
 
 INSTALLED_APPS = (
-    'grappelli.dashboard',
-    'grappelli',
-    'filebrowser',
-    
+    # 'grappelli.dashboard',
+    # 'grappelli',
+    # 'filebrowser',
+
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
