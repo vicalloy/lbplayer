@@ -1,32 +1,32 @@
 #encoding=utf-8
 import os
-from django import template
-from django.shortcuts import render_to_response, render, redirect
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 
 from .helper import render_json_response, gen_childs, keys2medias
 import settings as lbp_settings
 from .forms import UploadFileForm
 
+
 def player(request):
     template_name = 'lbplayer/player.html'
-    ctx = {'form':UploadFileForm()}
-    return render_to_response(template_name, ctx, 
-            context_instance=template.RequestContext(request))
-            
+    ctx = {'form': UploadFileForm()}
+    return render(request, template_name, ctx)
+
+
 def handle_uploaded_file(dest, file):
     try:
         dest_dir = os.path.join(lbp_settings.LBP_MEDIA_ROOT, dest)
         if not os.path.exists(dest_dir):
             os.makedirs(dest_dir)
-    except: # use media root if makedir failed
+    except:  # use media root if makedir failed
         dest_dir = lbp_settings.LBP_MEDIA_ROOT
-        
     path = os.path.join(dest_dir, file.name)
     f = open(path, 'wb+')
     for chunk in file.chunks():
         f.write(chunk)
     f.close()
+
 
 def upload(request):
     if request.method == 'POST':
@@ -36,12 +36,13 @@ def upload(request):
             handle_uploaded_file(dest, request.FILES['file'])
     return redirect('/')
 
+
 def sel_media(request):
     pass
     template_name = 'lbplayer/sel_media.html'
     ctx = {}
-    return render_to_response(template_name, ctx, 
-            context_instance=template.RequestContext(request))
+    return render(request, template_name, ctx)
+
 
 @csrf_exempt
 def ajax_childs(request):
@@ -53,14 +54,14 @@ def ajax_childs(request):
                 "isFolder": True,
                 "isLazy": True,
                 "url": "",
-                "children": nodes,
-        }
+                "children": nodes}
         nodes = [root_node]
     return render_json_response(nodes)
 
+
 @csrf_exempt
 def ajax_medias(request):
-    keys = request.POST.get("keys", "");
+    keys = request.POST.get("keys", "")
     keys = keys.split(',')
     medias = keys2medias(keys, lbp_settings.LBP_MEDIA_ROOT)
     return render_json_response(medias)

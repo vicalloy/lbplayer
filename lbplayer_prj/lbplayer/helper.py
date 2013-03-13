@@ -1,12 +1,21 @@
 #encoding=utf-8
+import sys
+if sys.version > '3':
+    PY3 = True
+else:
+    PY3 = False
 import os
 import os.path
-import urllib
 import json
+try:
+    from urllib import quote
+except:
+    from urllib.parse import quote
+
 
 from django.http import HttpResponse
 
-import settings as lbp_settings
+from . import settings as lbp_settings
 
 
 def render_json_response(data):
@@ -14,6 +23,8 @@ def render_json_response(data):
 
 
 def decode_fn(fn):
+    if PY3:
+        return fn
     encode = lbp_settings.LBP_FILENAME_ENCODE
     encode = encode.upper()
     if encode == 'UTF-8':
@@ -24,7 +35,7 @@ def decode_fn(fn):
 def fmt_fn(media_root, fn):
     fn = fn[len(media_root):].replace('\\', '/')
     fn = decode_fn(fn)
-    url = lbp_settings.LBP_MEDIA_PREFIX + urllib.quote(fn)
+    url = lbp_settings.LBP_MEDIA_PREFIX + quote(fn)
     return url
 
 

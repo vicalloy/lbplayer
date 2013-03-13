@@ -1,5 +1,6 @@
 from django.conf import settings
 
+
 def is_media(fn):
     return fn.upper().endswith('.MP3')
 
