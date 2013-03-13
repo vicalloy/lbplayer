@@ -1,4 +1,6 @@
 #encoding=utf-8
+from __future__ import unicode_literals
+
 import sys
 if sys.version > '3':
     PY3 = True
