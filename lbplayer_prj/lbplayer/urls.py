@@ -1,7 +1,6 @@
-#!/usr/bin/python  
-#encoding=utf-8  
-from django.conf.urls.defaults import *
-import views
+#encoding=utf-8
+from django.conf.urls import patterns, url
+from . import views
 
 urlpatterns = patterns('',
     url(r'^$', views.player, name="lbplayer_player"),

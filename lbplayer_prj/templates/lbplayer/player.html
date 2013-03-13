@@ -32,8 +32,8 @@
 <script type="text/javascript">
 //<![CDATA[
 swfPath = "{{ STATIC_URL }}lbplayer/js";
-url_lbplayer_sel_media = "{% url lbplayer_sel_media %}";
-url_lbplayer_ajax_medias = "{% url lbplayer_ajax_medias %}";
+url_lbplayer_sel_media = "{% url "lbplayer_sel_media" %}";
+url_lbplayer_ajax_medias = "{% url "lbplayer_ajax_medias" %}";
 $(document).ready(function(){
 	var Playlist = function(instance, options) {
 		var self = this;
@@ -283,7 +283,7 @@ $(document).ready(function(){
 				</div>
 				<div id="jp-file-upload" class="jp-playlist-ctrl" style="display: None">
 					<div style="padding: 4px 0 4px 10px">
-						<form enctype="multipart/form-data" method="post" action="{% url lbplayer_upload %}">
+						<form enctype="multipart/form-data" method="post" action="{% url "lbplayer_upload" %}">
                         {% csrf_token %}
                         {{form.as_p}}
                         <input type="submit" value="Upload" id="Save"/>
